@@ -12,12 +12,16 @@ export interface NotificationItem {
   createdAt: number
 }
 
+type NotificationPayload = Omit<NotificationItem, 'id' | 'createdAt'> & {
+  duration?: number
+}
+
 const defaultDuration = 5000
 
 export const useNotificationStore = defineStore('notification', () => {
   const notifications = ref<NotificationItem[]>([])
 
-  function add(notification: Omit<NotificationItem, 'id' | 'createdAt'>) {
+  function add(notification: NotificationPayload) {
     const id = typeof crypto !== 'undefined' && 'randomUUID' in crypto
       ? crypto.randomUUID()
       : String(Date.now())
@@ -25,8 +29,8 @@ export const useNotificationStore = defineStore('notification', () => {
     const item: NotificationItem = {
       id,
       createdAt: Date.now(),
-      duration: notification.duration ?? defaultDuration,
       ...notification,
+      duration: notification.duration ?? defaultDuration,
     }
 
     notifications.value.push(item)
