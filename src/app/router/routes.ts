@@ -29,6 +29,11 @@ export const routes: RouteRecordRaw[] = [
                 name: 'counter-pinia',
                 path: 'counter/pinia',
                 component: () => import('@/modules/samples/pages/CounterPiniaPage.vue'),
+            },
+            {
+                name: 'todo-list',
+                path: 'todo-list',
+                component: () => import('@/modules/samples/pages/TodoPage.vue'),
             }
         ]
     }

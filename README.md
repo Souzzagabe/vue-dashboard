@@ -40,3 +40,28 @@ npm run dev
 ```sh
 npm run build
 ```
+
+src/
+├── components/
+│   ├── shared/
+│   │   ├── Title.vue
+│   │   └── Button.vue
+│   │
+│   └── todo/
+│       ├── TodoForm.vue
+│       ├── TodoList.vue
+│       ├── TodoItem.vue
+│       ├── TodoFilters.vue
+│       └── TodoStats.vue
+│
+├── pages/
+│   └── TodoPage.vue
+│
+├── stores/
+│   └── todo.store.ts
+│
+├── types/
+│   └── todo.ts
+│
+└── router/
+    └── index.ts

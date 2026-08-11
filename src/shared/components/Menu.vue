@@ -7,9 +7,7 @@ import MenuItem from '@/shared/components/MenuItem.vue';
 
         <!-- Logo -->
         <div class="flex items-center gap-3 px-3">
-            <div 
-                class="w-10 h-10 rounded-xl bg-sky-600 flex items-center justify-center"
-            >
+            <div class="w-10 h-10 rounded-xl bg-sky-600 flex items-center justify-center">
                 <span class="font-bold text-white text-lg">
                     GS
                 </span>
@@ -34,20 +32,14 @@ import MenuItem from '@/shared/components/MenuItem.vue';
                 Navigation
             </span>
 
-            <MenuItem 
-                to="/home" 
-                label="Home" 
-            />
+            <MenuItem to="/home" label="Home" />
 
-            <MenuItem 
-                to="/counter" 
-                label="Counter" 
-            />
 
-            <MenuItem 
-                to="/counter/pinia" 
-                label="Counter (Pinia)" 
-            />
+            <MenuItem to="/todo-list" label="Todo List" />
+            <MenuItem to="/counter" label="Counter" />
+
+            <MenuItem to="/counter/pinia" label="Counter (Pinia)" />
+
 
         </div>
 
@@ -55,10 +47,7 @@ import MenuItem from '@/shared/components/MenuItem.vue';
         <!-- Área inferior -->
         <div class="mt-auto pt-6 border-t border-gray-800">
 
-            <MenuItem 
-                to="/auth" 
-                label="Authentication" 
-            />
+            <MenuItem to="/auth" label="Authentication" />
 
         </div>
 
