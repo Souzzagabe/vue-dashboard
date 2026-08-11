@@ -79,11 +79,21 @@ watch(filteredCommands, () => {
 <template>
   <Teleport to="body">
     <transition name="fade">
-      <div v-if="paletteStore.open" class="fixed inset-0 z-50 bg-black/50 p-4">
-        <div class="mx-auto max-w-2xl rounded-3xl bg-slate-950 border border-slate-800 p-6 shadow-2xl">
-          <div class="mb-4">
-            <p class="text-sm uppercase tracking-[0.3em] text-slate-500">Command Palette</p>
-            <h2 class="text-2xl font-semibold text-white">Pressione ESC para fechar</h2>
+      <div v-if="paletteStore.open" class="fixed inset-0 z-50 bg-black/50 p-4" @click.self="paletteStore.closePalette()">
+        <div class="mx-auto max-w-2xl rounded-3xl bg-slate-950 border border-slate-800 p-6 shadow-2xl" @click.stop>
+          <div class="mb-4 flex items-start justify-between gap-4">
+            <div>
+              <p class="text-sm uppercase tracking-[0.3em] text-slate-500">Command Palette</p>
+              <h2 class="text-2xl font-semibold text-white">Pressione ESC para fechar</h2>
+            </div>
+            <button
+              type="button"
+              @click="paletteStore.closePalette()"
+              class="inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-700 bg-slate-900 text-slate-400 transition hover:bg-slate-800 hover:text-white"
+              aria-label="Fechar paleta de comandos"
+            >
+              ×
+            </button>
           </div>
 
           <div class="mb-4">
