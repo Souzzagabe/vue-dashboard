@@ -14,18 +14,35 @@ export const useAuthStore = defineStore('auth', () => {
 
     const isAuthenticated = computed(() => !!token.value)
 
-    function init() {
-        const stored = localStorage.getItem('auth')
+    const cookieName = 'auth'
 
-        if (stored) {
-            const data: AuthPayload = JSON.parse(stored)
-            token.value = data.token
-            user.value = data.user
-        }
+    function setAuthCookie(value: string) {
+        document.cookie = `${cookieName}=${encodeURIComponent(value)}; path=/; max-age=86400`
+    }
+
+    function getAuthCookie() {
+        return document.cookie
+            .split('; ')
+            .find((cookie) => cookie.startsWith(`${cookieName}=`))
+            ?.split('=')[1]
+    }
+
+    function deleteAuthCookie() {
+        document.cookie = `${cookieName}=; path=/; max-age=0`
     }
 
     function generateFakeToken(email: string) {
         return btoa(`${email}:${Date.now()}`)
+    }
+
+    function init() {
+        const stored = getAuthCookie()
+
+        if (stored) {
+            const data: AuthPayload = JSON.parse(decodeURIComponent(stored))
+            token.value = data.token
+            user.value = data.user
+        }
     }
 
     async function login(email: string, password: string) {
@@ -45,7 +62,7 @@ export const useAuthStore = defineStore('auth', () => {
             user.value = fakeUser
             token.value = fakeToken
 
-            localStorage.setItem('auth', JSON.stringify({
+            setAuthCookie(JSON.stringify({
                 token: fakeToken,
                 user: fakeUser
             }))
@@ -64,7 +81,7 @@ export const useAuthStore = defineStore('auth', () => {
             user.value = null
             token.value = null
 
-            localStorage.removeItem('auth')
+            deleteAuthCookie()
 
         } finally {
             isLoading.value = false
