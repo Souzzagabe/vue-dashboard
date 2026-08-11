@@ -1,11 +1,24 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import Menu from '@/shared/components/Menu.vue'
 import { useAuthStore } from '@/modules/samples/states/auth'
+import { useCommandPaletteStore } from '@/modules/command/stores/commandPalette'
 import { useRouter, useRoute } from 'vue-router'
 
 const authStore = useAuthStore()
+const paletteStore = useCommandPaletteStore()
 const sidebarOpen = ref(false)
+
+const commandShortcut = computed(() => {
+  if (typeof navigator !== 'undefined' && /Mac|iP(hone|ad|od)|Darwin/.test(navigator.platform)) {
+    return '⌘ + K'
+  }
+  return 'Ctrl + K'
+})
+
+function openPalette() {
+  paletteStore.openPalette()
+}
 
 function getInitials(name?: string) {
   if (!name) return ''
@@ -59,8 +72,20 @@ async function handleLogout() {
           </div>
 
           <div class="flex items-center gap-3">
-            <button class="relative w-10 h-10 rounded-lg bg-gray-800 text-gray-400 hover:text-white hover:bg-gray-700 transition">
-              🔔
+            <button
+              @click="openPalette"
+              class="hidden sm:flex items-center gap-3 rounded-full border border-slate-700 bg-slate-900 px-4 py-2 text-sm font-medium text-slate-200 transition hover:border-sky-500 hover:text-white"
+              title="Abrir command palette"
+            >
+              <span>Command Palette</span>
+              <kbd class="rounded border border-slate-700 bg-slate-950 px-2 py-1 text-xs font-semibold text-slate-300">{{ commandShortcut }}</kbd>
+            </button>
+            <button
+              @click="openPalette"
+              class="sm:hidden inline-flex h-10 w-10 items-center justify-center rounded-lg border border-slate-700 bg-gray-800 text-slate-300 hover:border-sky-500 hover:text-white transition"
+              title="Abrir command palette"
+            >
+              ⌘K
             </button>
             <div class="hidden lg:flex items-center gap-3">
               <div class="w-9 h-9 rounded-full bg-sky-600 flex items-center justify-center">
