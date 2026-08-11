@@ -21,6 +21,12 @@ async function saveProfile() {
 
   if (!name.value.trim() || !email.value.trim()) {
     error.value = 'Name and email are required.'
+    notificationStore.add({
+      type: 'error',
+      title: 'Invalid profile',
+      message: 'Preencha nome e e-mail antes de salvar.',
+      duration: 4000,
+    })
     return
   }
 

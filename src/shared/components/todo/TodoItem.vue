@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
+import { useNotificationStore } from '@/modules/notifications/stores/notification'
 
 interface TodoItem {
   id: number
@@ -17,6 +18,7 @@ const emit = defineEmits<{
   (e: 'edit', id: number, title: string): void
 }>()
 
+const notificationStore = useNotificationStore()
 const isEditing = ref(false)
 const editTitle = ref(props.todo.title)
 
@@ -38,7 +40,16 @@ function cancelEdit() {
 
 function saveEdit() {
   const title = editTitle.value.trim()
-  if (!title) return
+  if (!title) {
+    notificationStore.add({
+      type: 'error',
+      title: 'Título inválido',
+      message: 'A tarefa não pode ficar vazia ao salvar.',
+      duration: 4000,
+    })
+    return
+  }
+
   if (title !== props.todo.title) {
     emit('edit', props.todo.id, title)
   }

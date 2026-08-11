@@ -1,15 +1,26 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import { useNotificationStore } from '@/modules/notifications/stores/notification'
 
 const emit = defineEmits<{
   (e: 'submit', title: string): void
 }>()
 
 const title = ref('')
+const notificationStore = useNotificationStore()
 
 function handleSubmit() {
   const value = title.value.trim()
-  if (!value) return
+  if (!value) {
+    notificationStore.add({
+      type: 'error',
+      title: 'Tarefa inválida',
+      message: 'Digite um título antes de adicionar a tarefa.',
+      duration: 4000,
+    })
+    return
+  }
+
   emit('submit', value)
   title.value = ''
 }

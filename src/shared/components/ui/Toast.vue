@@ -12,13 +12,13 @@ function handleClose(id: string) {
 </script>
 
 <template>
-  <div class="fixed right-4 top-4 z-50 flex w-full max-w-sm flex-col gap-3">
+  <div class="fixed right-4 bottom-4 z-50 flex max-w-sm flex-col gap-3 px-4">
     <transition-group name="toast" tag="div">
       <div
         v-for="item in notifications"
         :key="item.id"
         :class="[
-          'rounded-2xl border p-4 shadow-xl text-white transition',
+          'rounded-2xl border p-4 shadow-2xl text-white transition',
           item.type === 'success' ? 'bg-emerald-600 border-emerald-500' : '',
           item.type === 'error' ? 'bg-red-600 border-red-500' : '',
           item.type === 'warning' ? 'bg-amber-500 border-amber-400 text-slate-950' : '',
