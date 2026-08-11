@@ -36,9 +36,9 @@ import MenuItem from '@/shared/components/MenuItem.vue';
 
 
             <MenuItem to="/todo-list" label="Todo List" />
-            <MenuItem to="/counter" label="Counter" />
+            <!-- <MenuItem to="/counter" label="Counter" />
 
-            <MenuItem to="/counter/pinia" label="Counter (Pinia)" />
+            <MenuItem to="/counter/pinia" label="Counter (Pinia)" /> -->
 
 
         </div>
