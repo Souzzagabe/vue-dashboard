@@ -16,6 +16,10 @@ export const routes: RouteRecordRaw[] = [
         },
         children: [
             {
+                path: '',
+                redirect: 'home'
+            },
+            {
                 name: 'home',
                 path: 'home',
                 component: () => import('@/modules/samples/pages/HomePage.vue'),

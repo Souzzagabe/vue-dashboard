@@ -22,7 +22,7 @@ async function login() {
     try {
         await authStore.login(username.value, password.value);
 
-        const redirect = (route.query.redirect as string) || '/';
+        const redirect = (route.query.redirect as string) || '/home';
         router.push(redirect);
 
     } catch (e) {
