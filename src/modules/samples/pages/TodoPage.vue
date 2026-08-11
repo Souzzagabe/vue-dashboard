@@ -81,9 +81,10 @@ function clearCompleted() {
       :pending="stats.pending"
     />
 
-    <div class="grid gap-6 lg:grid-cols-[1fr_320px]">
+    <div class="grid gap-6">
       <div class="space-y-6">
         <TodoForm @submit="addTodo" />
+
         <TodoFilters
           @filter-changed="updateFilter"
           @clear-completed="clearCompleted"

@@ -1,36 +1,28 @@
 <script setup lang="ts">
-import Menu from '@/shared/components/Menu.vue';
-import { useAuthStore } from '@/modules/samples/states/auth';
-import { useRouter } from 'vue-router';
+import { ref } from 'vue'
+import Menu from '@/shared/components/Menu.vue'
+import { useAuthStore } from '@/modules/samples/states/auth'
+import { useRouter } from 'vue-router'
 
-const authStore = useAuthStore();
+const authStore = useAuthStore()
+const sidebarOpen = ref(false)
 
 function getInitials(name?: string) {
-    if (!name) return '';
-    return name
-        .split(' ')
-        .map(n => n[0])
-        .join('')
-        .toUpperCase()
-        .slice(0, 2);
+  if (!name) return ''
+  return name
+    .split(' ')
+    .map((n) => n[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2)
 }
-
 
 const router = useRouter()
 
-
-
 async function handleLogout() {
-
-    await authStore.logout()
-
-    await router.replace({
-        name: 'auth'
-    })
-
+  await authStore.logout()
+  await router.replace({ name: 'auth' })
 }
-
-
 </script>
 
 <template>
