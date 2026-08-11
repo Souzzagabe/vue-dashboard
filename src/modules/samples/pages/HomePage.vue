@@ -1,7 +1,8 @@
 <script setup lang="ts">
 
-import { ref, onMounted } from 'vue'
+import { computed, ref, onMounted } from 'vue'
 import Title from '@/shared/components/Title.vue'
+import { useAuthStore } from '@/modules/samples/states/auth'
 
 // CLIENTS
 import { apolloClient as countriesClient } from '@/services/graphql/countries.client'
@@ -24,6 +25,19 @@ type User = {
     name: string
     email: string
 }
+
+const authStore = useAuthStore()
+
+const pageTitle = computed(() => {
+  if (authStore.user?.role === 'admin') return 'Admin Dashboard'
+  if (authStore.user?.role === 'manager') return 'Manager Overview'
+  return 'Dashboard'
+})
+
+const pageSubtitle = computed(() => {
+  if (!authStore.user) return 'Loading your workspace...'
+  return `Welcome back, ${authStore.user.name}. Your role is ${authStore.user.role}.`
+})
 
 // STATE
 const loading = ref(false)
@@ -83,8 +97,8 @@ onMounted(() => {
 <div class="flex flex-col gap-6">
 
     <Title
-        title="Dashboard"
-        sub="Welcome to the dashboard"
+        :title="pageTitle"
+        :sub="pageSubtitle"
     />
 
     <!-- FILTROS -->

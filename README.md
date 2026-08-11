@@ -1,67 +1,139 @@
-# first-project
+# Vue Dashboard Portfolio
 
-This template should help get you started developing with Vue 3 in Vite.
+Um projeto Vue 3 + TypeScript + Tailwind estruturado como um painel de portfólio frontend profissional.
 
-## Recommended IDE Setup
+## Visão geral
 
-[VS Code](https://code.visualstudio.com/) + [Vue (Official)](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+O app foi evoluído para suportar:
 
-## Recommended Browser Setup
+- Autenticação com persistência via cookie
+- RBAC (role-based access control) com rotas protegidas
+- Layout de dashboard com menu responsivo
+- Página de perfil editável
+- Notificações globais com toast
+- Command palette global com atalho `Ctrl/Cmd + K`
+- Theme mode (light/dark/system)
+- Páginas de usuários e produtos
+- GraphQL/Apollo client preparado para cache e otimizações
 
-- Chromium-based browsers (Chrome, Edge, Brave, etc.):
-  - [Vue.js devtools](https://chromewebstore.google.com/detail/vuejs-devtools/nhdogjmejiglipccpnnnanhbledajbpd)
-  - [Turn on Custom Object Formatter in Chrome DevTools](http://bit.ly/object-formatters)
-- Firefox:
-  - [Vue.js devtools](https://addons.mozilla.org/en-US/firefox/addon/vue-js-devtools/)
-  - [Turn on Custom Object Formatter in Firefox DevTools](https://fxdx.dev/firefox-devtools-custom-object-formatters/)
+## Estrutura do projeto
 
-## Type Support for `.vue` Imports in TS
+- `src/app/`
+  - `App.vue` - shell da aplicação com notification center e command palette
+  - `main.ts` - bootstrap do Vue, Pinia, router e tema
+  - `router/` - rotas e guardas de acesso
 
-TypeScript cannot handle type information for `.vue` imports by default, so we replace the `tsc` CLI with `vue-tsc` for type checking. In editors, we need [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) to make the TypeScript language service aware of `.vue` types.
+- `src/shared/`
+  - `layouts/AppLayout.vue` - dashboard principal com sidebar e header
+  - `components/` - UI reaproveitável
+  - `components/ui/` - componentes de sistema como `Toast`, `Skeleton`, `Modal`, `Pagination`
+  - `types/index.ts` - tipos globais (`User`, `Role`, `Todo`, etc.)
 
-## Customize configuration
+- `src/modules/`
+  - `auth/` - páginas de login, perfil e acesso não autorizado
+  - `command/` - store e paleta de comandos
+  - `notifications/` - store de notificações e toasts
+  - `samples/` - páginas exemplo, estado de autenticação falso e utilitários
+  - `theme/` - store de tema e persistência local
+  - `users/` - página de listagem de usuários
+  - `products/` - página de produtos inicial
 
-See [Vite Configuration Reference](https://vite.dev/config/).
+## Funcionalidades implementadas
 
-## Project Setup
+### Autenticação e RBAC
+
+- `src/modules/samples/states/auth.ts`
+  - login fake com token e usuário persistido em cookie
+  - logout e remoção de cookie
+  - inicialização automática no bootstrap
+  - método `canAccess(roles)` para checar permissões
+  - `updateProfile(...)` para salvar alterações no perfil
+
+- `src/app/router/routes.ts`
+  - rotas protegidas por `requiresAuth` e `roles`
+  - rota `/auth` livre
+  - rota `/unauthorized` para acesso negado
+
+- `src/shared/components/Menu.vue`
+  - exibe links de navegação baseados em função do usuário
+
+### Página de perfil
+
+- `src/modules/auth/pages/ProfilePage.vue`
+  - edição de `name`, `email` e `role`
+  - feedback visual com notificação
+  - logout direto da página
+  - mantém token de sessão visível
+
+### Notificações
+
+- `src/modules/notifications/stores/notification.ts`
+  - store global de toast com duração configurável
+  - remoção automática de notificações
+
+- `src/shared/components/ui/Toast.vue`
+  - renderiza toasts dinamicamente
+
+- `src/shared/components/NotificationCenter.vue`
+  - component wrapper que monta a lista de toasts no app root
+
+### Command palette
+
+- `src/modules/command/stores/commandPalette.ts`
+  - comando global para navegação e logout
+  - estado aberto/fechado e query de busca
+
+- `src/shared/components/CommandPalette.vue`
+  - ativação com `Ctrl/Cmd + K`
+  - navegação por teclado e seleção via Enter
+
+### Tema
+
+- `src/modules/theme/stores/theme.ts`
+  - modo de tema `light`, `dark`, `system`
+  - persistência em `localStorage`
+  - inicialização em `main.ts`
+
+### Páginas e navegação
+
+- `src/modules/users/pages/UsersPage.vue`
+  - listagem de usuários com busca, loading e estados de vazio
+  - integração com GraphQL para dados de usuários
+
+- `src/modules/products/pages/ProductsPage.vue`
+  - placeholder de catálogo de produtos com estilo de painel
+
+- `src/shared/layouts/AppLayout.vue`
+  - dashboard responsivo com sidebar oculta em mobile
+  - header com perfil, notificações e logout
+
+## Como usar
 
 ```sh
 npm install
-```
-
-### Compile and Hot-Reload for Development
-
-```sh
 npm run dev
 ```
 
-### Type-Check, Compile and Minify for Production
+Acesse o app em `http://localhost:5173`.
 
-```sh
-npm run build
-```
+- `/auth` - login
+- `/home` - dashboard inicial
+- `/profile` - editar perfil
+- `/users` - listagem de usuários
+- `/products` - página de produtos
+- `/todo-list` - lista de tarefas
 
-src/
-├── components/
-│   ├── shared/
-│   │   ├── Title.vue
-│   │   └── Button.vue
-│   │
-│   └── todo/
-│       ├── TodoForm.vue
-│       ├── TodoList.vue
-│       ├── TodoItem.vue
-│       ├── TodoFilters.vue
-│       └── TodoStats.vue
-│
-├── pages/
-│   └── TodoPage.vue
-│
-├── stores/
-│   └── todo.store.ts
-│
-├── types/
-│   └── todo.ts
-│
-└── router/
-    └── index.ts
+## Observações de implementação
+
+- O auth é falso, ideal para evolução com backend real.
+- O `ProductsPage.vue` está criado como base para futura listagem e filtros.
+- O comando de logout está disponível tanto no perfil quanto na paleta de comandos.
+- O estado de tema é inicializado antes do router para manter o modo definido logo no carregamento.
+
+## Próximos passos sugeridos
+
+- adicionar CRUD real em `UsersPage` e `ProductsPage`
+- conectar GraphQL com mutações otimistas e cache Apollo
+- adicionar notificações de erros e sucesso em ações de backend
+- incluir autorização no backend e validação de acesso
+- implementar histórico de atividade ou painel analítico

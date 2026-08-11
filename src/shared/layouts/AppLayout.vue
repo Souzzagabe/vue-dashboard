@@ -69,8 +69,16 @@ async function handleLogout() {
               <div class="flex flex-col">
                 <span class="text-sm font-medium text-white">{{ getInitials(authStore.user?.name) }}</span>
                 <span class="text-xs text-gray-400">{{ authStore.user?.email }}</span>
+                <span class="text-xs text-gray-400">Role: {{ authStore.user?.role }}</span>
               </div>
             </div>
+            <RouterLink
+              v-if="authStore.user"
+              :to="{ name: 'profile' }"
+              class="rounded-lg bg-slate-800 px-3 py-2 text-sm text-gray-200 hover:bg-slate-700 transition"
+            >
+              Profile
+            </RouterLink>
             <button @click="handleLogout()" class="rounded-lg bg-gray-800 px-3 py-2 text-sm text-gray-200 hover:bg-gray-700 transition">
               Sign out
             </button>

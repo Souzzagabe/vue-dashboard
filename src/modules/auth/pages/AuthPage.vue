@@ -2,6 +2,7 @@
 import { ref } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useAuthStore } from '@/modules/samples/states/auth';
+import type { Role } from '@/shared/types';
 
 const authStore = useAuthStore();
 const router = useRouter();
@@ -9,6 +10,7 @@ const route = useRoute();
 
 const username = ref('');
 const password = ref('');
+const role = ref<Role>('user');
 const error = ref('');
 
 async function login() {
@@ -20,7 +22,7 @@ async function login() {
     }
 
     try {
-        await authStore.login(username.value, password.value);
+        await authStore.login(username.value, password.value, role.value);
 
         const redirect = (route.query.redirect as string) || '/home';
         router.push(redirect);
@@ -64,6 +66,15 @@ async function login() {
                     placeholder="Password"
                     class="w-full px-4 py-2 rounded-lg bg-gray-800 border border-gray-700 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-sky-600"
                 />
+
+                <label class="text-sm text-slate-300">
+                    Role
+                    <select v-model="role" class="mt-2 w-full rounded-lg border border-gray-700 bg-gray-800 px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-sky-600">
+                        <option value="user">User</option>
+                        <option value="manager">Manager</option>
+                        <option value="admin">Admin</option>
+                    </select>
+                </label>
             </div>
 
             <!-- Botão -->
