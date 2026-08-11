@@ -103,7 +103,7 @@ watch(filteredCommands, () => {
                 :key="item.id"
                 :class="[
                   'cursor-pointer border-b border-slate-800 px-4 py-4 transition hover:bg-slate-900',
-                  index === activeIndex.value ? 'bg-slate-900' : '',
+                  index === activeIndex ? 'bg-slate-900' : '',
                 ]"
                 @click="selectCommand(item.id)"
               >
