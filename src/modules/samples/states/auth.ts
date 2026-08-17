@@ -1,100 +1,102 @@
-import { defineStore } from 'pinia'
+﻿import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
-import type { User } from '@/modules/auth/pages/model/user'
 
-type AuthPayload = {
-    token: string
-    user: User
-}
+import {
+  authService,
+  type AuthUser,
+} from '@/services/auth.service'
 
 export const useAuthStore = defineStore('auth', () => {
-    const isLoading = ref(false)
-    const user = ref<User | null>(null)
-    const token = ref<string | null>(null)
+  const user = ref<AuthUser | null>(null)
 
-    const isAuthenticated = computed(() => !!token.value)
+  const isLoading = ref(false)
+  const isInitialized = ref(false)
 
-    const cookieName = 'auth'
+  const isAuthenticated = computed(() => {
+    return !!user.value
+  })
 
-    function setAuthCookie(value: string) {
-        document.cookie = `${cookieName}=${encodeURIComponent(value)}; path=/; max-age=86400`
+  async function login(
+    username: string,
+    password: string
+  ) {
+    try {
+      isLoading.value = true
+
+      await authService.login({
+        username,
+        password,
+      })
+
+      /*
+       * O backend acabou de criar o cookie HttpOnly.
+       *
+       * Não tentamos acessar o token aqui.
+       */
+
+      await fetchUser()
+
+    } finally {
+      isLoading.value = false
+    }
+  }
+
+  async function fetchUser() {
+    try {
+      const authenticatedUser = await authService.me()
+
+      user.value = authenticatedUser
+
+      return authenticatedUser
+
+    } catch (error) {
+      user.value = null
+
+      throw error
+    }
+  }
+
+  async function init() {
+    if (isInitialized.value) {
+      return
     }
 
-    function getAuthCookie() {
-        return document.cookie
-            .split('; ')
-            .find((cookie) => cookie.startsWith(`${cookieName}=`))
-            ?.split('=')[1]
+    try {
+      await fetchUser()
+    } catch {
+      /*
+       * Não existe sessão válida.
+       *
+       * Isso é normal quando o usuário ainda não fez login.
+       */
+      user.value = null
+    } finally {
+      isInitialized.value = true
     }
+  }
 
-    function deleteAuthCookie() {
-        document.cookie = `${cookieName}=; path=/; max-age=0`
+  async function logout() {
+    try {
+      isLoading.value = true
+
+      await authService.logout()
+
+    } finally {
+      user.value = null
+      isLoading.value = false
+      isInitialized.value = true
     }
+  }
 
-    function generateFakeToken(email: string) {
-        return btoa(`${email}:${Date.now()}`)
-    }
+  return {
+    user,
+    isLoading,
+    isInitialized,
+    isAuthenticated,
 
-    function init() {
-        const stored = getAuthCookie()
-
-        if (stored) {
-            const data: AuthPayload = JSON.parse(decodeURIComponent(stored))
-            token.value = data.token
-            user.value = data.user
-        }
-    }
-
-    async function login(email: string, password: string) {
-        try {
-            isLoading.value = true
-
-            await new Promise((resolve) => setTimeout(resolve, 1500))
-
-            const fakeUser: User = {
-                id: '31',
-                name: 'Gabriel Souza',
-                email
-            }
-
-            const fakeToken = generateFakeToken(email)
-
-            user.value = fakeUser
-            token.value = fakeToken
-
-            setAuthCookie(JSON.stringify({
-                token: fakeToken,
-                user: fakeUser
-            }))
-
-        } finally {
-            isLoading.value = false
-        }
-    }
-
-    async function logout() {
-        try {
-            isLoading.value = true
-
-            await new Promise((resolve) => setTimeout(resolve, 500))
-
-            user.value = null
-            token.value = null
-
-            deleteAuthCookie()
-
-        } finally {
-            isLoading.value = false
-        }
-    }
-
-    return {
-        isLoading,
-        user,
-        token,
-        isAuthenticated,
-        login,
-        logout,
-        init
-    }
+    login,
+    logout,
+    init,
+    fetchUser,
+  }
 })
