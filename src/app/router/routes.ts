@@ -22,7 +22,7 @@ export const routes: RouteRecordRaw[] = [
             {
                 name: 'home',
                 path: 'home',
-                component: () => import('@/modules/samples/pages/HomePage.vue'),
+                component: () => import('@/modules/dashboard/views/DashboardView.vue'),
             },
             {
                 name: 'counter',
