@@ -1,8 +1,10 @@
+
+Todoitem · VUE
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 
 interface TodoItem {
-  id: number
+  id: string
   title: string
   completed: boolean
 }
@@ -12,9 +14,9 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
-  (e: 'toggle', id: number): void
-  (e: 'remove', id: number): void
-  (e: 'edit', id: number, title: string): void
+  (e: 'toggle', id: string): void
+  (e: 'remove', id: string): void
+  (e: 'edit', id: string, title: string): void
 }>()
 
 const isEditing = ref(false)
@@ -112,3 +114,35 @@ function saveEdit() {
     </div>
   </li>
 </template>
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

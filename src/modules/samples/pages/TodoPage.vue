@@ -1,24 +1,17 @@
-```vue
 <script setup lang="ts">
-import { computed, reactive } from 'vue'
+import { computed, onMounted, reactive } from 'vue'
 import TodoStats from '@/shared/components/todo/TodoStats.vue'
 import TodoForm from '@/shared/components/todo/TodoForm.vue'
 import TodoFilters from '@/shared/components/todo/TodoFilters.vue'
 import TodoList from '@/shared/components/todo/TodoList.vue'
-
-type Todo = {
-  id: number
-  title: string
-  completed: boolean
-}
+import { todoService, type Todo } from '@/services/todo.service'
 
 const state = reactive({
-  todos: [
-    { id: 1, title: 'Aprender Vue 3', completed: true },
-    { id: 2, title: 'Criar a estrutura do todo', completed: false },
-    { id: 3, title: 'Testar filtros e ações', completed: false },
-  ] as Todo[],
+  listId: '' as string,
+  todos: [] as Todo[],
   filter: 'all' as 'all' | 'active' | 'completed',
+  isLoading: true,
+  error: '',
 })
 
 const filteredTodos = computed(() => {
@@ -35,35 +28,119 @@ const stats = computed(() => ({
   pending: state.todos.filter((todo) => !todo.completed).length,
 }))
 
-function addTodo(title: string) {
-  state.todos.push({
-    id: Date.now(),
-    title,
-    completed: false,
-  })
+/**
+ * A API organiza tarefas dentro de listas (users -> lists -> todos).
+ * Essa tela não tem seletor de lista, então usamos a primeira lista
+ * do usuário — e criamos uma automaticamente se ele ainda não tiver
+ * nenhuma.
+ */
+async function loadTodos() {
+  state.isLoading = true
+  state.error = ''
+
+  try {
+    const lists = await todoService.getLists()
+    const firstList = lists[0]
+
+    if (firstList !== undefined) {
+      state.listId = firstList.id
+    } else {
+      const created = await todoService.createList('Minhas tarefas')
+      state.listId = created.id
+    }
+
+    state.todos = await todoService.getTodos(state.listId)
+  } catch (e: any) {
+    state.error =
+      e.response?.data?.message || 'Erro ao carregar tarefas'
+  } finally {
+    state.isLoading = false
+  }
 }
 
-function toggleTodo(id: number) {
+async function addTodo(title: string) {
+  if (!state.listId) return
+
+  try {
+    const { id } = await todoService.createTodo(state.listId, { title })
+
+    state.todos.push({
+      id,
+      list_id: state.listId,
+      title,
+      description: '',
+      completed: false,
+      created_at: new Date().toISOString(),
+    })
+  } catch (e: any) {
+    state.error = e.response?.data?.message || 'Erro ao criar tarefa'
+  }
+}
+
+async function toggleTodo(id: string) {
   const todo = state.todos.find((item) => item.id === id)
-  if (todo) todo.completed = !todo.completed
+  if (!todo || !state.listId) return
+
+  const completed = !todo.completed
+  todo.completed = completed // atualização otimista
+
+  try {
+    await todoService.updateTodo(state.listId, id, {
+      title: todo.title,
+      description: todo.description,
+      completed,
+    })
+  } catch (e: any) {
+    todo.completed = !completed // desfaz se der erro
+    state.error = e.response?.data?.message || 'Erro ao atualizar tarefa'
+  }
 }
 
-function removeTodo(id: number) {
+async function removeTodo(id: string) {
+  if (!state.listId) return
+
+  const previous = state.todos
   state.todos = state.todos.filter((item) => item.id !== id)
+
+  try {
+    await todoService.deleteTodo(state.listId, id)
+  } catch (e: any) {
+    state.todos = previous
+    state.error = e.response?.data?.message || 'Erro ao remover tarefa'
+  }
 }
 
-function editTodo(id: number, title: string) {
+async function editTodo(id: string, title: string) {
   const todo = state.todos.find((item) => item.id === id)
-  if (todo) todo.title = title
+  if (!todo || !state.listId) return
+
+  const previousTitle = todo.title
+  todo.title = title
+
+  try {
+    await todoService.updateTodo(state.listId, id, {
+      title,
+      description: todo.description,
+      completed: todo.completed,
+    })
+  } catch (e: any) {
+    todo.title = previousTitle
+    state.error = e.response?.data?.message || 'Erro ao editar tarefa'
+  }
 }
 
 function updateFilter(value: 'all' | 'active' | 'completed') {
   state.filter = value
 }
 
-function clearCompleted() {
-  state.todos = state.todos.filter((todo) => !todo.completed)
+async function clearCompleted() {
+  const completed = state.todos.filter((todo) => todo.completed)
+  await Promise.all(completed.map((todo) => removeTodo(todo.id)))
 }
+
+onMounted(() => {
+  loadTodos()
+})
 </script>
 
 <template>
@@ -73,6 +150,13 @@ function clearCompleted() {
       <p class="mt-1 text-sm text-gray-400">
         Organize suas tarefas e acompanhe seu progresso.
       </p>
+    </div>
+
+    <div
+      v-if="state.error"
+      class="rounded-xl border border-red-500 bg-red-500/10 p-3 text-sm text-red-400"
+    >
+      {{ state.error }}
     </div>
 
     <TodoStats
@@ -89,7 +173,13 @@ function clearCompleted() {
           @filter-changed="updateFilter"
           @clear-completed="clearCompleted"
         />
+
+        <div v-if="state.isLoading" class="text-center text-slate-400">
+          Carregando tarefas...
+        </div>
+
         <TodoList
+          v-else
           :todos="filteredTodos"
           @toggle="toggleTodo"
           @remove="removeTodo"
@@ -99,4 +189,3 @@ function clearCompleted() {
     </div>
   </div>
 </template>
-```

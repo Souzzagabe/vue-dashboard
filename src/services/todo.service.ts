@@ -1,61 +1,118 @@
-import { api } from './api';
-
+import { api } from './api'
+ 
+export interface TodoList {
+  id: string
+  user_id: string
+  name: string
+  created_at: string
+}
+ 
 export interface Todo {
-  id: string;
-  title: string;
-  completed: boolean;
-  user_id?: string;
-  created_at?: string;
+  id: string
+  list_id: string
+  title: string
+  description?: string
+  completed: boolean
+  created_at: string
 }
-
-export interface CreateTodoRequest {
-  title: string;
+ 
+export interface CreateTodoPayload {
+  title: string
+  description?: string
+  completed?: boolean
 }
-
-export interface UpdateTodoRequest {
-  title?: string;
-  completed?: boolean;
-}
-
+ 
 export const todoService = {
-  async getTodos(): Promise<Todo[]> {
-    const { data } = await api.get<Todo[]>('/todos');
-
-    return data;
+  async getLists(): Promise<TodoList[]> {
+    const { data } = await api.get<TodoList[]>('/lists')
+ 
+    return data
   },
-
-  async getTodo(id: string): Promise<Todo> {
-    const { data } = await api.get<Todo>(
-      `/todos/${id}`
-    );
-
-    return data;
+ 
+  async createList(name: string): Promise<{ id: string }> {
+    const { data } = await api.post<{ id: string }>(
+      '/lists',
+      { name }
+    )
+ 
+    return data
   },
-
+ 
+  async getTodos(
+    listId: string,
+    search?: string
+  ): Promise<Todo[]> {
+    const { data } = await api.get<Todo[]>(
+      `/lists/${listId}/todos`,
+      {
+        params: search ? { search } : undefined,
+      }
+    )
+ 
+    return data
+  },
+ 
   async createTodo(
-    todo: CreateTodoRequest
-  ): Promise<Todo> {
-    const { data } = await api.post<Todo>(
-      '/todos',
-      todo
-    );
-
-    return data;
+    listId: string,
+    payload: CreateTodoPayload
+  ): Promise<{ id: string }> {
+    const { data } = await api.post<{ id: string }>(
+      `/lists/${listId}/todos`,
+      payload
+    )
+ 
+    return data
   },
-
+ 
   async updateTodo(
+    listId: string,
     id: string,
-    todo: UpdateTodoRequest
-  ): Promise<Todo> {
-    const { data } = await api.put<Todo>(
-      `/todos/${id}`,
-      todo
-    );
-
-    return data;
+    payload: CreateTodoPayload
+  ): Promise<void> {
+    await api.put(
+      `/lists/${listId}/todos/${id}`,
+      payload
+    )
   },
-
-  async deleteTodo(id: string): Promise<void> {
-    await api.delete(`/todos/${id}`);
+ 
+  async deleteTodo(
+    listId: string,
+    id: string
+  ): Promise<void> {
+    await api.delete(
+      `/lists/${listId}/todos/${id}`
+    )
   },
-};
+}
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
