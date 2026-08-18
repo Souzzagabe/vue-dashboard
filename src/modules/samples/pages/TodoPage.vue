@@ -1,9 +1,13 @@
 <script setup lang="ts">
 import { computed, onMounted, reactive } from 'vue'
+
+import Skeleton from 'primevue/skeleton'
+
 import TodoStats from '@/shared/components/todo/TodoStats.vue'
 import TodoForm from '@/shared/components/todo/TodoForm.vue'
 import TodoFilters from '@/shared/components/todo/TodoFilters.vue'
 import TodoList from '@/shared/components/todo/TodoList.vue'
+
 import { todoService, type Todo } from '@/services/todo.service'
 
 const state = reactive({
@@ -18,6 +22,7 @@ const filteredTodos = computed(() => {
   return state.todos.filter((todo) => {
     if (state.filter === 'active') return !todo.completed
     if (state.filter === 'completed') return todo.completed
+
     return true
   })
 })
@@ -62,7 +67,10 @@ async function addTodo(title: string) {
   if (!state.listId) return
 
   try {
-    const { id } = await todoService.createTodo(state.listId, { title })
+    const { id } = await todoService.createTodo(
+      state.listId,
+      { title }
+    )
 
     state.todos.push({
       id,
@@ -73,26 +81,40 @@ async function addTodo(title: string) {
       created_at: new Date().toISOString(),
     })
   } catch (e: any) {
-    state.error = e.response?.data?.message || 'Erro ao criar tarefa'
+    state.error =
+      e.response?.data?.message || 'Erro ao criar tarefa'
   }
 }
 
 async function toggleTodo(id: string) {
-  const todo = state.todos.find((item) => item.id === id)
+  const todo = state.todos.find(
+    (item) => item.id === id
+  )
+
   if (!todo || !state.listId) return
 
   const completed = !todo.completed
-  todo.completed = completed // atualização otimista
+
+  // Atualização otimista
+  todo.completed = completed
 
   try {
-    await todoService.updateTodo(state.listId, id, {
-      title: todo.title,
-      description: todo.description,
-      completed,
-    })
+    await todoService.updateTodo(
+      state.listId,
+      id,
+      {
+        title: todo.title,
+        description: todo.description,
+        completed,
+      }
+    )
   } catch (e: any) {
-    todo.completed = !completed // desfaz se der erro
-    state.error = e.response?.data?.message || 'Erro ao atualizar tarefa'
+    // Desfaz atualização se a API falhar
+    todo.completed = !completed
+
+    state.error =
+      e.response?.data?.message ||
+      'Erro ao atualizar tarefa'
   }
 }
 
@@ -100,42 +122,78 @@ async function removeTodo(id: string) {
   if (!state.listId) return
 
   const previous = state.todos
-  state.todos = state.todos.filter((item) => item.id !== id)
+
+  // Atualização otimista
+  state.todos = state.todos.filter(
+    (item) => item.id !== id
+  )
 
   try {
-    await todoService.deleteTodo(state.listId, id)
+    await todoService.deleteTodo(
+      state.listId,
+      id
+    )
   } catch (e: any) {
+    // Restaura caso dê erro
     state.todos = previous
-    state.error = e.response?.data?.message || 'Erro ao remover tarefa'
+
+    state.error =
+      e.response?.data?.message ||
+      'Erro ao remover tarefa'
   }
 }
 
-async function editTodo(id: string, title: string) {
-  const todo = state.todos.find((item) => item.id === id)
+async function editTodo(
+  id: string,
+  title: string
+) {
+  const todo = state.todos.find(
+    (item) => item.id === id
+  )
+
   if (!todo || !state.listId) return
 
   const previousTitle = todo.title
+
+  // Atualização otimista
   todo.title = title
 
   try {
-    await todoService.updateTodo(state.listId, id, {
-      title,
-      description: todo.description,
-      completed: todo.completed,
-    })
+    await todoService.updateTodo(
+      state.listId,
+      id,
+      {
+        title,
+        description: todo.description,
+        completed: todo.completed,
+      }
+    )
   } catch (e: any) {
+    // Restaura caso dê erro
     todo.title = previousTitle
-    state.error = e.response?.data?.message || 'Erro ao editar tarefa'
+
+    state.error =
+      e.response?.data?.message ||
+      'Erro ao editar tarefa'
   }
 }
 
-function updateFilter(value: 'all' | 'active' | 'completed') {
+function updateFilter(
+  value: 'all' | 'active' | 'completed'
+) {
   state.filter = value
 }
 
 async function clearCompleted() {
-  const completed = state.todos.filter((todo) => todo.completed)
-  await Promise.all(completed.map((todo) => removeTodo(todo.id)))
+  const completed = state.todos.filter(
+    (todo) => todo.completed
+  )
+
+  await Promise.all(
+    completed.map((todo) =>
+      removeTodo(todo.id)
+    )
+  )
 }
 
 onMounted(() => {
@@ -145,19 +203,39 @@ onMounted(() => {
 
 <template>
   <div class="space-y-6">
+
+    <!-- HEADER -->
+
     <div>
-      <h1 class="text-2xl font-bold text-white">To-Do List</h1>
+      <h1 class="text-2xl font-bold text-white">
+        To-Do List
+      </h1>
+
       <p class="mt-1 text-sm text-gray-400">
         Organize suas tarefas e acompanhe seu progresso.
       </p>
     </div>
 
+
+    <!-- ERROR -->
+
     <div
       v-if="state.error"
-      class="rounded-xl border border-red-500 bg-red-500/10 p-3 text-sm text-red-400"
+      class="
+        rounded-xl
+        border
+        border-red-500
+        bg-red-500/10
+        p-3
+        text-sm
+        text-red-400
+      "
     >
       {{ state.error }}
     </div>
+
+
+    <!-- STATS -->
 
     <TodoStats
       :total="stats.total"
@@ -165,18 +243,86 @@ onMounted(() => {
       :pending="stats.pending"
     />
 
+
     <div class="grid gap-6">
+
       <div class="space-y-6">
-        <TodoForm @submit="addTodo" />
+
+        <!-- FORM -->
+
+        <TodoForm
+          @submit="addTodo"
+        />
+
+
+        <!-- FILTERS -->
 
         <TodoFilters
           @filter-changed="updateFilter"
           @clear-completed="clearCompleted"
         />
 
-        <div v-if="state.isLoading" class="text-center text-slate-400">
-          Carregando tarefas...
+
+        <!-- SKELETON -->
+
+        <div
+          v-if="state.isLoading"
+          class="space-y-3"
+        >
+
+          <div
+            v-for="item in 4"
+            :key="item"
+            class="
+              flex
+              items-center
+              gap-4
+              rounded-xl
+              border
+              border-gray-200
+              bg-white
+              p-4
+            "
+          >
+
+            <!-- CHECKBOX -->
+
+            <Skeleton
+              width="20px"
+              height="20px"
+              border-radius="6px"
+              class="!bg-slate-200"
+            />
+
+
+            <!-- TODO -->
+
+            <div class="flex-1">
+
+              <Skeleton
+                width="65%"
+                height="16px"
+                class="!bg-slate-200"
+              />
+
+            </div>
+
+
+            <!-- ACTION -->
+
+            <Skeleton
+              width="32px"
+              height="32px"
+              border-radius="8px"
+              class="!bg-slate-200"
+            />
+
+          </div>
+
         </div>
+
+
+        <!-- TODO LIST -->
 
         <TodoList
           v-else
@@ -185,7 +331,10 @@ onMounted(() => {
           @remove="removeTodo"
           @edit="editTodo"
         />
+
       </div>
+
     </div>
+
   </div>
 </template>
