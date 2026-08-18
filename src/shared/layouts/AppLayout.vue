@@ -6,17 +6,6 @@ import { useRouter, useRoute } from 'vue-router'
 
 const authStore = useAuthStore()
 const sidebarOpen = ref(false)
-
-function getInitials(name?: string) {
-  if (!name) return ''
-  return name
-    .split(' ')
-    .map((n) => n[0])
-    .join('')
-    .toUpperCase()
-    .slice(0, 2)
-}
-
 const router = useRouter()
 const route = useRoute()
 
@@ -52,8 +41,8 @@ async function handleLogout() {
                 class="w-10 h-10 rounded-xl bg-sky-600 flex items-center justify-center text-lg font-bold text-white">GS
               </div>
               <div>
-                <p class="text-sm font-semibold text-white">My Vue App</p>
-                <p class="text-xs text-gray-400 hidden sm:block">Dashboard responsivo</p>
+                <p class="text-sm font-semibold text-white"></p>
+                <p class="text-xs text-gray-400 hidden sm:block"></p>
               </div>
             </div>
           </div>

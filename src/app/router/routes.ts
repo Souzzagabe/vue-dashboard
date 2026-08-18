@@ -38,6 +38,15 @@ export const routes: RouteRecordRaw[] = [
                 name: 'todo-list',
                 path: 'todo-list',
                 component: () => import('@/modules/samples/pages/TodoPage.vue'),
+            },
+            {
+                name: 'admin',
+                path: 'admin',
+                component: () => import('@/modules/samples/pages/AdminPage.vue'),
+                meta: {
+                    requiresAuth: true,
+                    requiresAdmin: true,
+                },
             }
         ]
     }

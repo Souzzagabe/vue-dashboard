@@ -1,5 +1,18 @@
-<script setup lang="ts">
-import MenuItem from '@/shared/components/MenuItem.vue';
+﻿<script setup lang="ts">
+import { onMounted, ref } from 'vue'
+import MenuItem from '@/shared/components/MenuItem.vue'
+import { authService } from '@/services/auth.service'
+
+const isAdmin = ref(false)
+
+onMounted(async () => {
+    try {
+        const me = await authService.me()
+        isAdmin.value = me.role === 'admin'
+    } catch {
+        isAdmin.value = false
+    }
+})
 </script>
 
 <template>
@@ -15,7 +28,6 @@ import MenuItem from '@/shared/components/MenuItem.vue';
 
             <div>
                 <h1 class="text-white font-semibold">
-                    My Vue App
                 </h1>
 
                 <span class="text-xs text-gray-400">
@@ -40,6 +52,7 @@ import MenuItem from '@/shared/components/MenuItem.vue';
 
             <MenuItem to="/counter/pinia" label="Counter (Pinia)" /> -->
 
+            <MenuItem v-if="isAdmin" to="/admin" label="Admin" />
 
         </div>
 
