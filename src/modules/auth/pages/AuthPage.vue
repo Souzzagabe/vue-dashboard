@@ -27,6 +27,7 @@ function loginWithGoogle() {
 
   window.location.href = `${apiBaseUrl}/auth/google`
 }
+
 async function login() {
     error.value = ''
 
