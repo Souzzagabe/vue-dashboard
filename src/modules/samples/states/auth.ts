@@ -41,6 +41,24 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
+  async function exchangeGoogleToken(googleToken: string) {
+    try {
+      isLoading.value = true
+
+      await authService.exchangeGoogleToken(googleToken)
+
+      /*
+       * Mesma lógica do login comum: o backend acabou de criar o
+       * cookie HttpOnly, então só confirmamos buscando o usuário.
+       */
+
+      await fetchUser()
+
+    } finally {
+      isLoading.value = false
+    }
+  }
+
   async function fetchUser() {
     try {
       const authenticatedUser = await authService.me()
@@ -98,5 +116,6 @@ export const useAuthStore = defineStore('auth', () => {
     logout,
     init,
     fetchUser,
+    exchangeGoogleToken,
   }
 })

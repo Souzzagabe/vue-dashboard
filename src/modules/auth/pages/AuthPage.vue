@@ -12,6 +12,7 @@ const mode = ref<'login' | 'register'>('login')
 
 const username = ref('')
 const password = ref('')
+const isExchangingGoogle = ref(!!route.query.googleToken)
 const error = ref(
     route.query.error === 'google'
         ? 'Não foi possível entrar com o Google. Tente novamente.'
@@ -28,7 +29,28 @@ function loginWithGoogle() {
   window.location.href = `${apiBaseUrl}/auth/google`
 }
 
-console.log(import.meta.env.VITE_API_URL)
+/**
+ * O callback do Google redireciona pra cá com ?googleToken=... em vez de
+ * já vir logado — essa troca acontece aqui, numa chamada XHR direta
+ * (não faz parte da cadeia de redirects entre domínios, então o cookie
+ * é aceito normalmente pelo navegador).
+ */
+async function exchangeGoogleToken(token: string) {
+    try {
+        await authStore.exchangeGoogleToken(token)
+
+        const redirect = (route.query.redirect as string) || '/home'
+        router.push(redirect)
+    } catch {
+        error.value = 'Não foi possível entrar com o Google. Tente novamente.'
+    } finally {
+        isExchangingGoogle.value = false
+    }
+}
+
+if (typeof route.query.googleToken === 'string') {
+    exchangeGoogleToken(route.query.googleToken)
+}
 async function login() {
     error.value = ''
 
@@ -68,8 +90,15 @@ async function handleRegistered(registeredUsername: string, registeredPassword: 
 
         <div class="w-full max-w-md bg-gray-900 border border-gray-800 rounded-2xl shadow-xl p-8">
 
+            <div
+                v-if="isExchangingGoogle"
+                class="flex flex-col items-center gap-3 py-8 text-center"
+            >
+                <p class="text-sm text-gray-400">Entrando com Google...</p>
+            </div>
+
             <RegisterForm
-                v-if="mode === 'register'"
+                v-else-if="mode === 'register'"
                 @registered="handleRegistered"
                 @cancel="mode = 'login'"
             />
