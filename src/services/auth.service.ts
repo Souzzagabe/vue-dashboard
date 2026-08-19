@@ -55,11 +55,23 @@ export const authService = {
     return data
   },
 
-  async me(): Promise<AuthUser> {
-    const { data } = await api.get<AuthUser>('/me')
+async me(): Promise<AuthUser> {
+  console.log('Chamando /me')
 
-    return data
-  },
+  try {
+    const response = await api.get<AuthUser>('/me')
+
+    console.log('Resposta /me:', response.data)
+
+    return response.data
+  } catch (error: any) {
+    console.error('ERRO /me:', error)
+    console.error('STATUS:', error.response?.status)
+    console.error('DATA:', error.response?.data)
+
+    throw error
+  }
+},
 
   async logout(): Promise<void> {
     await api.post('/logout')
