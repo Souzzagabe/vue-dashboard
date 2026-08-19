@@ -56,25 +56,24 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-async function init() {
-  if (isInitialized.value) {
-    return
+  async function init() {
+    if (isInitialized.value) {
+      return
+    }
+
+    try {
+      await fetchUser()
+    } catch {
+      /*
+       * Não existe sessão válida.
+       *
+       * Isso é normal quando o usuário ainda não fez login.
+       */
+      user.value = null
+    } finally {
+      isInitialized.value = true
+    }
   }
-
-  try {
-    console.log('Inicializando autenticação...')
-
-    await fetchUser()
-
-    console.log('Autenticação restaurada:', user.value)
-  } catch (error) {
-    console.error('Falha ao restaurar autenticação:', error)
-
-    user.value = null
-  } finally {
-    isInitialized.value = true
-  }
-}
 
   async function logout() {
     try {
