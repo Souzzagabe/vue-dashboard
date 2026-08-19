@@ -28,6 +28,7 @@ function loginWithGoogle() {
   window.location.href = `${apiBaseUrl}/auth/google`
 }
 
+console.log(import.meta.env.VITE_API_URL)
 async function login() {
     error.value = ''
 
