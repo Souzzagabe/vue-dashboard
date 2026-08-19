@@ -18,12 +18,15 @@ const error = ref(
         : ''
 )
 
-const apiBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000'
+const apiBaseUrl = import.meta.env.VITE_API_URL
 
 function loginWithGoogle() {
-    window.location.href = `${apiBaseUrl}/auth/google`
-}
+  if (!apiBaseUrl) {
+    throw new Error('VITE_API_URL não configurada')
+  }
 
+  window.location.href = `${apiBaseUrl}/auth/google`
+}
 async function login() {
     error.value = ''
 
