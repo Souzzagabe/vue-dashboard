@@ -16,30 +16,39 @@ export const useAuthStore = defineStore('auth', () => {
     return !!user.value
   })
 
-  async function login(
-    username: string,
-    password: string
-  ) {
-    try {
-      isLoading.value = true
+async function login(
+  username: string,
+  password: string
+) {
+  try {
+    isLoading.value = true
 
-      await authService.login({
-        username,
-        password,
-      })
+    console.log('1. Fazendo login...')
 
-      /*
-       * O backend acabou de criar o cookie HttpOnly.
-       *
-       * Não tentamos acessar o token aqui.
-       */
+    const response = await authService.login({
+      username,
+      password,
+    })
 
-      await fetchUser()
+    console.log('2. Login respondeu:', response)
 
-    } finally {
-      isLoading.value = false
-    }
+    console.log('3. Buscando usuário...')
+
+    const authenticatedUser = await fetchUser()
+
+    console.log(
+      '4. Usuário autenticado:',
+      authenticatedUser
+    )
+
+  } catch (error) {
+    console.error('ERRO NO LOGIN:', error)
+    throw error
+
+  } finally {
+    isLoading.value = false
   }
+}
 
   async function exchangeGoogleToken(googleToken: string) {
     try {
@@ -74,39 +83,24 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-async function login(
-  username: string,
-  password: string
-) {
-  try {
-    isLoading.value = true
+  async function init() {
+    if (isInitialized.value) {
+      return
+    }
 
-    console.log('1. Fazendo login...')
-
-    const response = await authService.login({
-      username,
-      password,
-    })
-
-    console.log('2. Login respondeu:', response)
-
-    console.log('3. Buscando usuário...')
-
-    const authenticatedUser = await fetchUser()
-
-    console.log(
-      '4. Usuário autenticado:',
-      authenticatedUser
-    )
-
-  } catch (error) {
-    console.error('ERRO NO LOGIN:', error)
-    throw error
-
-  } finally {
-    isLoading.value = false
+    try {
+      await fetchUser()
+    } catch {
+      /*
+       * Não existe sessão válida.
+       *
+       * Isso é normal quando o usuário ainda não fez login.
+       */
+      user.value = null
+    } finally {
+      isInitialized.value = true
+    }
   }
-}
 
   async function logout() {
     try {
