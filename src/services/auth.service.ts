@@ -64,21 +64,4 @@ export const authService = {
   async logout(): Promise<void> {
     await api.post('/logout')
   },
-
-  /**
-   * Troca o token de curta duração devolvido pelo callback do Google
-   * pelo cookie de sessão de verdade. Precisa ser uma chamada XHR direta
-   * (não parte de um redirect entre domínios), senão o navegador pode
-   * bloquear o cookie por proteção anti "bounce tracking".
-   */
-  async exchangeGoogleToken(
-    googleToken: string
-  ): Promise<LoginResponse> {
-    const { data } = await api.post<LoginResponse>(
-      '/auth/google/exchange',
-      { token: googleToken }
-    )
-
-    return data
-  },
 }
