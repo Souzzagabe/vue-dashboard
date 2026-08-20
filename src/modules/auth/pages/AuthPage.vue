@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '@/modules/samples/states/auth'
 import RegisterForm from '@/shared/components/RegisterForm.vue'
@@ -48,9 +48,11 @@ async function exchangeGoogleToken(token: string) {
     }
 }
 
-if (typeof route.query.googleToken === 'string') {
-    exchangeGoogleToken(route.query.googleToken)
-}
+onMounted(() => {
+    if (typeof route.query.googleToken === 'string') {
+        exchangeGoogleToken(route.query.googleToken)
+    }
+})
 async function login() {
     error.value = ''
 

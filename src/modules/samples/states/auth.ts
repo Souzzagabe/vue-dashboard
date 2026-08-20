@@ -16,39 +16,30 @@ export const useAuthStore = defineStore('auth', () => {
     return !!user.value
   })
 
-async function login(
-  username: string,
-  password: string
-) {
-  try {
-    isLoading.value = true
+  async function login(
+    username: string,
+    password: string
+  ) {
+    try {
+      isLoading.value = true
 
-    console.log('1. Fazendo login...')
+      await authService.login({
+        username,
+        password,
+      })
 
-    const response = await authService.login({
-      username,
-      password,
-    })
+      /*
+       * O backend acabou de criar o cookie HttpOnly.
+       *
+       * Não tentamos acessar o token aqui.
+       */
 
-    console.log('2. Login respondeu:', response)
+      await fetchUser()
 
-    console.log('3. Buscando usuário...')
-
-    const authenticatedUser = await fetchUser()
-
-    console.log(
-      '4. Usuário autenticado:',
-      authenticatedUser
-    )
-
-  } catch (error) {
-    console.error('ERRO NO LOGIN:', error)
-    throw error
-
-  } finally {
-    isLoading.value = false
+    } finally {
+      isLoading.value = false
+    }
   }
-}
 
   async function exchangeGoogleToken(googleToken: string) {
     try {
