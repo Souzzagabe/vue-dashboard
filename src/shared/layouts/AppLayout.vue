@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import gsImage from '../../../public/gs.png'
 import { ref, watch } from 'vue'
 import Menu from '@/shared/components/Menu.vue'
 import { useAuthStore } from '@/modules/samples/states/auth'
@@ -37,9 +38,14 @@ async function handleLogout() {
               ☰
             </button>
             <div class="flex items-center gap-3">
-              <div
-                class="w-10 h-10 rounded-xl bg-sky-600 flex items-center justify-center text-lg font-bold text-white">GS
-              </div>
+              <!-- Removido o bg-sky-600 e ajustado o encaixe da imagem -->
+<div class="flex items-center justify-center h-16 pt-4">
+  <img
+    :src="gsImage"
+    alt="GS"
+    class="w-24 h-24 object-contain"
+  />
+</div>
               <div>
                 <p class="text-sm font-semibold text-white"></p>
                 <p class="text-xs text-gray-400 hidden sm:block"></p>
@@ -68,7 +74,7 @@ async function handleLogout() {
             </div>
             <button @click="handleLogout()"
               class="rounded-lg bg-gray-800 px-3 py-2 text-sm text-gray-200 hover:bg-gray-700 transition">
-              Sign out
+              Sair
             </button>
           </div>
         </header>
@@ -89,7 +95,7 @@ async function handleLogout() {
         <div class="flex items-center justify-between mb-6">
           <div class="flex items-center gap-3">
             <div class="w-10 h-10 rounded-xl bg-sky-600 flex items-center justify-center text-lg font-bold text-white">
-              GS</div>
+            </div>
             <div>
               <p class="text-sm font-semibold text-white">My Vue App</p>
               <p class="text-xs text-gray-400">Menu móvel</p>

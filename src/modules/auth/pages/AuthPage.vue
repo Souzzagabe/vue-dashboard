@@ -161,11 +161,11 @@ async function handleRegistered(
 
         <div class="text-center">
           <h1 class="text-2xl font-semibold">
-            Sign in
+            Entrar
           </h1>
 
           <p class="text-sm text-gray-400">
-            Access your account
+            Acesse sua conta
           </p>
         </div>
 

@@ -20,50 +20,38 @@ onMounted(async () => {
 
         <!-- Logo -->
         <div class="flex items-center gap-3 px-3">
-            <div class="w-10 h-10 rounded-xl bg-sky-600 flex items-center justify-center">
-                <span class="font-bold text-white text-lg">
-                    GS
-                </span>
-            </div>
-
             <div>
                 <h1 class="text-white font-semibold">
                 </h1>
-
-                <span class="text-xs text-gray-400">
-                    Dashboard
-                </span>
             </div>
         </div>
 
-
-        <!-- Menu mais abaixo -->
+        <!-- Menu -->
         <div class="mt-12 flex flex-col gap-2">
 
             <span class="px-3 text-xs uppercase text-gray-500 tracking-wider">
-                Navigation
+                Navegação
             </span>
 
             <MenuItem to="/home" label="Home" />
 
-
-            <MenuItem to="/todo-list" label="Todo List" />
-            <!-- <MenuItem to="/counter" label="Counter" />
-
-            <MenuItem to="/counter/pinia" label="Counter (Pinia)" /> -->
+            <MenuItem to="/todo-list" label="Lista de tarefas" />
 
             <MenuItem v-if="isAdmin" to="/admin" label="Admin" />
-
         </div>
 
 
-        <!-- Área inferior -->
-        <div class="mt-auto pt-6 border-t border-gray-800">
-
-            <MenuItem to="/auth" label="Authentication" />
-
+        <div class="mt-auto w-full px-3 pb-4 pt-8">
+            <div class="border-t border-gray-800 pt-4 flex justify-center">
+                <p class="text-xs text-gray-500">
+                    Powered by
+                    <a href="https://www.linkedin.com/in/gabriel-souza-web/" target="_blank" rel="noopener noreferrer"
+                        class="text-gray-400 transition-colors hover:text-white">
+                        @souzzagabe
+                    </a>
+                </p>
+            </div>
         </div>
-
 
     </nav>
 </template>
