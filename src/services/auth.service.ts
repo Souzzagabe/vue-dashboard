@@ -26,13 +26,30 @@ export interface AuthUser {
   role?: 'admin' | 'user'
 }
 
+/**
+ * Hash SHA-256 (hex) da senha, calculado no navegador via Web Crypto API.
+ * A senha em si nunca é incluída no corpo da requisição — só esse hash,
+ * enviado via header.
+ */
+async function sha256Hex(text: string): Promise<string> {
+  const data = new TextEncoder().encode(text)
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data)
+
+  return Array.from(new Uint8Array(hashBuffer))
+    .map((b) => b.toString(16).padStart(2, '0'))
+    .join('')
+}
+
 export const authService = {
   async login(
     credentials: LoginRequest
   ): Promise<LoginResponse> {
+    const passwordHash = await sha256Hex(credentials.password)
+
     const { data } = await api.post<LoginResponse>(
       '/login',
-      credentials
+      { username: credentials.username },
+      { headers: { 'X-Password-Hash': passwordHash } }
     )
 
     return data
@@ -47,9 +64,12 @@ export const authService = {
   async register(
     payload: RegisterRequest
   ): Promise<RegisterResponse> {
+    const passwordHash = await sha256Hex(payload.password)
+
     const { data } = await api.post<RegisterResponse>(
       '/users',
-      payload
+      { username: payload.username },
+      { headers: { 'X-Password-Hash': passwordHash } }
     )
 
     return data
