@@ -52,10 +52,17 @@ function saveEdit() {
     <div class="flex flex-1 items-center gap-3">
       <span
         v-if="props.reorderable"
-        class="select-none text-slate-600 tracking-widest"
+        class="select-none rounded-lg p-1 text-slate-600 transition hover:bg-slate-800 hover:text-slate-300"
         title="Arraste para reordenar"
       >
-        ⋮⋮
+        <svg width="14" height="20" viewBox="0 0 14 20" fill="currentColor">
+          <circle cx="3" cy="3" r="1.6" />
+          <circle cx="11" cy="3" r="1.6" />
+          <circle cx="3" cy="10" r="1.6" />
+          <circle cx="11" cy="10" r="1.6" />
+          <circle cx="3" cy="17" r="1.6" />
+          <circle cx="11" cy="17" r="1.6" />
+        </svg>
       </span>
 
       <input

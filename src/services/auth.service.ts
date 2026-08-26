@@ -23,7 +23,15 @@ export interface RegisterResponse {
 export interface AuthUser {
   id: string
   username: string
+  email?: string
+  name?: string
+  avatar_base64?: string
   role?: 'admin' | 'user'
+}
+
+export interface UpdateProfilePayload {
+  name?: string
+  avatar_base64?: string
 }
 
 /**
@@ -83,6 +91,37 @@ export const authService = {
 
   async logout(): Promise<void> {
     await api.post('/logout')
+  },
+
+  /**
+   * Atualiza nome e/ou avatar do usuário autenticado.
+   * Não exige senha — não são dados sensíveis de identidade.
+   */
+  async updateProfile(
+    payload: UpdateProfilePayload
+  ): Promise<AuthUser> {
+    const { data } = await api.put<AuthUser>('/profile', payload)
+
+    return data
+  },
+
+  /**
+   * Troca o e-mail do usuário. Exige a senha atual (via hash) pra
+   * confirmar identidade antes de uma mudança sensível.
+   */
+  async updateEmail(
+    email: string,
+    currentPassword: string
+  ): Promise<LoginResponse> {
+    const passwordHash = await sha256Hex(currentPassword)
+
+    const { data } = await api.put<LoginResponse>(
+      '/profile/email',
+      { email },
+      { headers: { 'X-Password-Hash': passwordHash } }
+    )
+
+    return data
   },
 
   /**

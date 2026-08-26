@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, reactive } from 'vue'
+import { computed, onMounted, reactive, ref } from 'vue'
 import TodoStats from '@/shared/components/todo/TodoStats.vue'
 import TodoForm from '@/shared/components/todo/TodoForm.vue'
 import TodoFilters from '@/shared/components/todo/TodoFilters.vue'
@@ -13,6 +13,14 @@ const state = reactive({
   isLoading: true,
   error: '',
 })
+
+const DRAG_HINT_KEY = 'todo-drag-hint-dismissed'
+const showDragHint = ref(localStorage.getItem(DRAG_HINT_KEY) !== 'true')
+
+function dismissDragHint() {
+  showDragHint.value = false
+  localStorage.setItem(DRAG_HINT_KEY, 'true')
+}
 
 const filteredTodos = computed(() => {
   return state.todos.filter((todo) => {
@@ -138,9 +146,10 @@ async function editTodo(id: string, title: string) {
 async function reorderTodos(orderedIds: string[]) {
   if (!state.listId) return
 
+  dismissDragHint()
+
   const previous = state.todos
   const byId = new Map(state.todos.map((t) => [t.id, t]))
-
   state.todos = orderedIds
     .map((id) => byId.get(id))
     .filter((t): t is Todo => !!t)
@@ -200,6 +209,31 @@ onMounted(() => {
 
         <div v-if="state.isLoading" class="text-center text-slate-400">
           Carregando tarefas...
+        </div>
+
+        <div
+          v-if="showDragHint && state.filter === 'all' && filteredTodos.length > 1"
+          class="flex items-center justify-between gap-3 rounded-2xl border border-sky-800/50 bg-sky-500/10 px-4 py-3 text-sm text-sky-300"
+        >
+          <div class="flex items-center gap-2">
+            <svg width="14" height="20" viewBox="0 0 14 20" fill="currentColor" class="shrink-0 opacity-80">
+              <circle cx="3" cy="3" r="1.6" />
+              <circle cx="11" cy="3" r="1.6" />
+              <circle cx="3" cy="10" r="1.6" />
+              <circle cx="11" cy="10" r="1.6" />
+              <circle cx="3" cy="17" r="1.6" />
+              <circle cx="11" cy="17" r="1.6" />
+            </svg>
+            <span>Arraste as tarefas pelo ⣿ para reordenar por prioridade.</span>
+          </div>
+
+          <button
+            type="button"
+            class="shrink-0 text-sky-400 transition hover:text-sky-200"
+            @click="dismissDragHint"
+          >
+            Entendi
+          </button>
         </div>
 
         <TodoList

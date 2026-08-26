@@ -47,6 +47,11 @@ export const routes: RouteRecordRaw[] = [
                     requiresAuth: true,
                     requiresAdmin: true,
                 },
+            },
+            {
+                name: 'profile',
+                path: 'profile',
+                component: () => import('@/modules/samples/pages/ProfilePage.vue'),
             }
         ]
     }
