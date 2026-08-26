@@ -15,7 +15,10 @@ const state = reactive({
 })
 
 const DRAG_HINT_KEY = 'todo-drag-hint-dismissed'
-const showDragHint = ref(localStorage.getItem(DRAG_HINT_KEY) !== 'true')
+
+const showDragHint = ref(
+  localStorage.getItem(DRAG_HINT_KEY) !== 'true'
+)
 
 function dismissDragHint() {
   showDragHint.value = false
@@ -26,6 +29,7 @@ const filteredTodos = computed(() => {
   return state.todos.filter((todo) => {
     if (state.filter === 'active') return !todo.completed
     if (state.filter === 'completed') return todo.completed
+
     return true
   })
 })
@@ -70,7 +74,9 @@ async function addTodo(title: string) {
   if (!state.listId) return
 
   try {
-    const { id } = await todoService.createTodo(state.listId, { title })
+    const { id } = await todoService.createTodo(state.listId, {
+      title,
+    })
 
     state.todos.push({
       id,
@@ -82,16 +88,20 @@ async function addTodo(title: string) {
       created_at: new Date().toISOString(),
     })
   } catch (e: any) {
-    state.error = e.response?.data?.message || 'Erro ao criar tarefa'
+    state.error =
+      e.response?.data?.message || 'Erro ao criar tarefa'
   }
 }
 
 async function toggleTodo(id: string) {
   const todo = state.todos.find((item) => item.id === id)
+
   if (!todo || !state.listId) return
 
   const completed = !todo.completed
-  todo.completed = completed // atualização otimista
+
+  // Atualização otimista
+  todo.completed = completed
 
   try {
     await todoService.updateTodo(state.listId, id, {
@@ -100,30 +110,45 @@ async function toggleTodo(id: string) {
       completed,
     })
   } catch (e: any) {
-    todo.completed = !completed // desfaz se der erro
-    state.error = e.response?.data?.message || 'Erro ao atualizar tarefa'
+    // Desfaz a alteração se ocorrer erro
+    todo.completed = !completed
+
+    state.error =
+      e.response?.data?.message || 'Erro ao atualizar tarefa'
   }
 }
 
 async function removeTodo(id: string) {
   if (!state.listId) return
 
-  const previous = state.todos
-  state.todos = state.todos.filter((item) => item.id !== id)
+  const previous = [...state.todos]
+
+  // Atualização otimista
+  state.todos = state.todos.filter(
+    (item) => item.id !== id
+  )
 
   try {
     await todoService.deleteTodo(state.listId, id)
   } catch (e: any) {
+    // Restaura se ocorrer erro
     state.todos = previous
-    state.error = e.response?.data?.message || 'Erro ao remover tarefa'
+
+    state.error =
+      e.response?.data?.message || 'Erro ao remover tarefa'
   }
 }
 
 async function editTodo(id: string, title: string) {
-  const todo = state.todos.find((item) => item.id === id)
+  const todo = state.todos.find(
+    (item) => item.id === id
+  )
+
   if (!todo || !state.listId) return
 
   const previousTitle = todo.title
+
+  // Atualização otimista
   todo.title = title
 
   try {
@@ -133,42 +158,71 @@ async function editTodo(id: string, title: string) {
       completed: todo.completed,
     })
   } catch (e: any) {
+    // Desfaz a alteração
     todo.title = previousTitle
-    state.error = e.response?.data?.message || 'Erro ao editar tarefa'
+
+    state.error =
+      e.response?.data?.message || 'Erro ao editar tarefa'
   }
 }
 
 /**
- * orderedIds vem do TodoList já na nova ordem (drag and drop).
- * Só é chamado quando o filtro é 'all' (ver reorderable no template),
- * então orderedIds sempre cobre a lista inteira.
+ * orderedIds vem do TodoList já na nova ordem.
+ * Como o reordenamento só está habilitado no filtro "all",
+ * os IDs representam a lista completa.
  */
 async function reorderTodos(orderedIds: string[]) {
   if (!state.listId) return
 
   dismissDragHint()
 
-  const previous = state.todos
-  const byId = new Map(state.todos.map((t) => [t.id, t]))
+  const previous = [...state.todos]
+
+  const byId = new Map(
+    state.todos.map((todo) => [todo.id, todo])
+  )
+
   state.todos = orderedIds
-    .map((id) => byId.get(id))
-    .filter((t): t is Todo => !!t)
+    .map((id, index) => {
+      const todo = byId.get(id)
+
+      if (!todo) return undefined
+
+      return {
+        ...todo,
+        position: index,
+      }
+    })
+    .filter((todo): todo is Todo => todo !== undefined)
 
   try {
-    await todoService.reorderTodos(state.listId, orderedIds)
+    await todoService.reorderTodos(
+      state.listId,
+      orderedIds
+    )
   } catch (e: any) {
     state.todos = previous
-    state.error = e.response?.data?.message || 'Erro ao reordenar tarefas'
+
+    state.error =
+      e.response?.data?.message ||
+      'Erro ao reordenar tarefas'
   }
 }
 
-function updateFilter(value: 'all' | 'active' | 'completed') {
+function updateFilter(
+  value: 'all' | 'active' | 'completed'
+) {
   state.filter = value
 }
 
 async function clearCompleted() {
-  const completed = state.todos.filter((todo) => todo.completed)
-  await Promise.all(completed.map((todo) => removeTodo(todo.id)))
+  const completed = state.todos.filter(
+    (todo) => todo.completed
+  )
+
+  await Promise.all(
+    completed.map((todo) => removeTodo(todo.id))
+  )
 }
 
 onMounted(() => {
@@ -179,7 +233,10 @@ onMounted(() => {
 <template>
   <div class="space-y-6">
     <div>
-      <h1 class="text-2xl font-bold text-white">To-Do List</h1>
+      <h1 class="text-2xl font-bold text-white">
+        To-Do List
+      </h1>
+
       <p class="mt-1 text-sm text-gray-400">
         Organize suas tarefas e acompanhe seu progresso.
       </p>
@@ -207,16 +264,30 @@ onMounted(() => {
           @clear-completed="clearCompleted"
         />
 
-        <div v-if="state.isLoading" class="text-center text-slate-400">
+        <div
+          v-if="state.isLoading"
+          class="text-center text-slate-400"
+        >
           Carregando tarefas...
         </div>
 
         <div
-          v-if="showDragHint && state.filter === 'all' && filteredTodos.length > 1"
+          v-if="
+            !state.isLoading &&
+            showDragHint &&
+            state.filter === 'all' &&
+            filteredTodos.length > 1
+          "
           class="flex items-center justify-between gap-3 rounded-2xl border border-sky-800/50 bg-sky-500/10 px-4 py-3 text-sm text-sky-300"
         >
           <div class="flex items-center gap-2">
-            <svg width="14" height="20" viewBox="0 0 14 20" fill="currentColor" class="shrink-0 opacity-80">
+            <svg
+              width="14"
+              height="20"
+              viewBox="0 0 14 20"
+              fill="currentColor"
+              class="shrink-0 opacity-80"
+            >
               <circle cx="3" cy="3" r="1.6" />
               <circle cx="11" cy="3" r="1.6" />
               <circle cx="3" cy="10" r="1.6" />
@@ -224,7 +295,11 @@ onMounted(() => {
               <circle cx="3" cy="17" r="1.6" />
               <circle cx="11" cy="17" r="1.6" />
             </svg>
-            <span>Arraste as tarefas pelo ⣿ para reordenar por prioridade.</span>
+
+            <span>
+              Arraste as tarefas pelo ⣿ para reordenar por
+              prioridade.
+            </span>
           </div>
 
           <button
@@ -237,7 +312,7 @@ onMounted(() => {
         </div>
 
         <TodoList
-          v-else
+          v-if="!state.isLoading"
           :todos="filteredTodos"
           :reorderable="state.filter === 'all'"
           @toggle="toggleTodo"
