@@ -1,18 +1,15 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import TodoItem from './TodoItem.vue'
 
 type Todo = {
   id: string
-  list_id: string
   title: string
-  description?: string
   completed: boolean
-  position: number
-  created_at: string
 }
 
-defineProps<{
-  todo: Todo
+const props = defineProps<{
+  todos: Todo[]
   reorderable?: boolean
 }>()
 
@@ -20,129 +17,93 @@ const emit = defineEmits<{
   (e: 'toggle', id: string): void
   (e: 'remove', id: string): void
   (e: 'edit', id: string, title: string): void
+  (e: 'reorder', orderedIds: string[]): void
 }>()
 
-const isEditing = ref(false)
-const editedTitle = ref('')
+const draggedIndex = ref<number | null>(null)
+const dragOverIndex = ref<number | null>(null)
 
-function startEditing(title: string) {
-  editedTitle.value = title
-  isEditing.value = true
+function onDragStart(index: number) {
+  if (!props.reorderable) return
+
+  draggedIndex.value = index
 }
 
-function saveEditing(id: string) {
-  const title = editedTitle.value.trim()
+function onDragEnter(index: number) {
+  if (!props.reorderable) return
 
-  if (title) {
-    emit('edit', id, title)
+  dragOverIndex.value = index
+}
+
+function onDrop(index: number) {
+  if (!props.reorderable) return
+
+  if (draggedIndex.value === null || draggedIndex.value === index) {
+    resetDrag()
+    return
   }
 
-  isEditing.value = false
+  const reordered = [...props.todos]
+  const [moved] = reordered.splice(draggedIndex.value, 1)
+
+  if (!moved) {
+    resetDrag()
+    return
+  }
+
+  reordered.splice(index, 0, moved)
+
+  emit(
+    'reorder',
+    reordered.map((todo) => todo.id),
+  )
+
+  resetDrag()
 }
 
-function cancelEditing() {
-  isEditing.value = false
-  editedTitle.value = ''
+function resetDrag() {
+  draggedIndex.value = null
+  dragOverIndex.value = null
 }
 </script>
 
 <template>
-  <li
-    class="flex items-center gap-3 rounded-xl bg-slate-800 p-4 transition"
-  >
-    <!-- Checkbox -->
-    <button
-      type="button"
-      class="flex h-5 w-5 shrink-0 items-center justify-center rounded border border-slate-500 transition"
-      :class="
-        todo.completed
-          ? 'border-sky-500 bg-sky-500'
-          : 'hover:border-sky-400'
-      "
-      @click.stop="emit('toggle', todo.id)"
-    >
-      <span
-        v-if="todo.completed"
-        class="text-xs font-bold text-white"
-      >
-        ✓
-      </span>
-    </button>
-
-    <!-- Conteúdo -->
-    <div class="min-w-0 flex-1">
-      <!-- Edição -->
-      <form
-        v-if="isEditing"
-        class="flex gap-2"
-        @submit.prevent="saveEditing(todo.id)"
-      >
-        <input
-          v-model="editedTitle"
-          autofocus
-          type="text"
-          class="min-w-0 flex-1 rounded-lg border border-slate-600 bg-slate-900 px-3 py-2 text-sm text-white outline-none focus:border-sky-500"
-          @keydown.escape="cancelEditing"
+  <div class="rounded-2xl bg-slate-900 p-4 shadow-sm">
+    <template v-if="props.todos.length">
+      <ul class="flex flex-col gap-3">
+        <TodoItem
+          v-for="(todo, index) in props.todos"
+          :key="todo.id"
+          :todo="todo"
+          :reorderable="props.reorderable"
+          :draggable="props.reorderable ? 'true' : 'false'"
+          :class="[
+            'transition',
+            props.reorderable
+              ? 'cursor-grab active:cursor-grabbing'
+              : 'cursor-default',
+            dragOverIndex === index && draggedIndex !== index
+              ? 'ring-2 ring-sky-500'
+              : '',
+            draggedIndex === index ? 'opacity-40' : '',
+          ]"
+          @dragstart="onDragStart(index)"
+          @dragenter.prevent="onDragEnter(index)"
+          @dragover.prevent
+          @drop="onDrop(index)"
+          @dragend="resetDrag"
+          @toggle="(id) => emit('toggle', id)"
+          @remove="(id) => emit('remove', id)"
+          @edit="(id, title) => emit('edit', id, title)"
         />
+      </ul>
+    </template>
 
-        <button
-          type="submit"
-          class="rounded-lg bg-sky-600 px-3 py-2 text-sm text-white hover:bg-sky-500"
-        >
-          Salvar
-        </button>
-
-        <button
-          type="button"
-          class="rounded-lg bg-slate-700 px-3 py-2 text-sm text-slate-300 hover:bg-slate-600"
-          @click="cancelEditing"
-        >
-          Cancelar
-        </button>
-      </form>
-
-      <!-- Visualização -->
-      <template v-else>
-        <p
-          class="truncate text-sm font-medium transition"
-          :class="
-            todo.completed
-              ? 'text-slate-500 line-through'
-              : 'text-white'
-          "
-        >
-          {{ todo.title }}
-        </p>
-
-        <p
-          v-if="todo.description"
-          class="mt-1 text-xs text-slate-400"
-        >
-          {{ todo.description }}
-        </p>
-      </template>
-    </div>
-
-    <!-- Ações -->
     <div
-      v-if="!isEditing"
-      class="flex shrink-0 items-center gap-2"
+      v-else
+      class="rounded-2xl border border-dashed border-slate-700 p-8 text-center text-slate-400"
     >
-      <button
-        type="button"
-        class="rounded-lg px-3 py-2 text-xs text-slate-400 hover:bg-slate-700 hover:text-white"
-        @click.stop="startEditing(todo.title)"
-      >
-        Editar
-      </button>
-
-      <button
-        type="button"
-        class="rounded-lg px-3 py-2 text-xs text-red-400 hover:bg-red-500/10 hover:text-red-300"
-        @click.stop="emit('remove', todo.id)"
-      >
-        Excluir
-      </button>
+      Nenhuma tarefa encontrada. Adicione uma tarefa para começar.
     </div>
-  </li>
+  </div>
 </template>
