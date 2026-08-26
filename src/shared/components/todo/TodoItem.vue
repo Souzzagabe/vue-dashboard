@@ -1,5 +1,3 @@
-
-Todoitem · VUE
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 
@@ -11,6 +9,7 @@ interface TodoItem {
 
 const props = defineProps<{
   todo: TodoItem
+  reorderable?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -51,6 +50,14 @@ function saveEdit() {
 <template>
   <li class="flex flex-col gap-3 rounded-2xl bg-slate-950 border border-slate-800 p-4 sm:flex-row sm:items-center">
     <div class="flex flex-1 items-center gap-3">
+      <span
+        v-if="props.reorderable"
+        class="select-none text-slate-600 tracking-widest"
+        title="Arraste para reordenar"
+      >
+        ⋮⋮
+      </span>
+
       <input
         type="checkbox"
         class="h-5 w-5 rounded border-slate-700 bg-slate-900 text-sky-500"
@@ -114,35 +121,3 @@ function saveEdit() {
     </div>
   </li>
 </template>
- 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
