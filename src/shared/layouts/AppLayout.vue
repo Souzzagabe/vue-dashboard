@@ -9,7 +9,7 @@ import { useRouter, useRoute } from 'vue-router'
 
 const authStore = useAuthStore()
 const sidebarOpen = ref(false)
-const hasOpenTasks = ref(false)
+const hasOpenTasks = ref<boolean | null>(null)
 const router = useRouter()
 const route = useRoute()
 
@@ -80,14 +80,18 @@ async function handleLogout() {
 
           <div class="flex items-center gap-3">
             <button
+              :title="hasOpenTasks ? 'Você tem tarefas pendentes para resolver' : 'Todas as tarefas foram concluídas'"
               class="relative w-10 h-10 rounded-lg bg-gray-800 text-gray-400 hover:text-white hover:bg-gray-700 transition">
               🔔
-              <span
-                v-if="hasOpenTasks"
-                class="absolute -top-0.5 -right-0.5 flex h-3 w-3"
-              >
-                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                <span class="relative inline-flex h-3 w-3 rounded-full bg-red-500"></span>
+              <span v-if="hasOpenTasks !== null" class="absolute -top-0.5 -right-0.5 flex h-3 w-3">
+                <span
+                  v-if="hasOpenTasks"
+                  class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"
+                ></span>
+                <span
+                  class="relative inline-flex h-3 w-3 rounded-full"
+                  :class="hasOpenTasks ? 'bg-red-500' : 'bg-emerald-500'"
+                ></span>
               </span>
             </button>
             <div class="hidden lg:flex items-center gap-3">
