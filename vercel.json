@@ -3,6 +3,10 @@
     {
       "source": "/api/:path*",
       "destination": "https://api-node-fastfy.onrender.com/:path*"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
     }
   ]
 }

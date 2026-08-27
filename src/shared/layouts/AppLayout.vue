@@ -2,6 +2,7 @@
 import gsImage from '../../../public/gs.png'
 import { ref, watch } from 'vue'
 import Menu from '@/shared/components/Menu.vue'
+import Footer from '@/shared/components/Footer.vue'
 import { useAuthStore } from '@/modules/samples/states/auth'
 import { useRouter, useRoute } from 'vue-router'
 
@@ -59,12 +60,25 @@ async function handleLogout() {
               🔔
             </button>
             <div class="hidden lg:flex items-center gap-3">
-              <div class="w-9 h-9 rounded-full bg-sky-600 flex items-center justify-center">
-                <span class="text-sm font-semibold">GS</span>
-              </div>
+              <RouterLink to="/profile" class="shrink-0">
+                <img
+                  v-if="authStore.user?.avatar_base64"
+                  :src="authStore.user.avatar_base64"
+                  alt="Foto de perfil"
+                  class="w-9 h-9 rounded-full object-cover border border-gray-700 hover:border-sky-500 transition"
+                />
+                <div
+                  v-else
+                  class="w-9 h-9 rounded-full bg-sky-600 flex items-center justify-center hover:bg-sky-500 transition"
+                >
+                  <span class="text-sm font-semibold">
+                    {{ (authStore.user?.username || '?').charAt(0).toUpperCase() }}
+                  </span>
+                </div>
+              </RouterLink>
               <div class="flex flex-col">
                 <span class="text-sm font-medium text-white">
-                  {{ authStore.user?.username }}
+                  {{ authStore.user?.email || authStore.user?.username }}
                 </span>
 
                 <span class="text-xs text-gray-400">
@@ -82,6 +96,8 @@ async function handleLogout() {
         <main class="flex-1 p-4 sm:p-6 overflow-auto bg-gray-950">
           <RouterView />
         </main>
+
+        <Footer />
       </div>
     </div>
 
