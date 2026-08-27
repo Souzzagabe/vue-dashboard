@@ -4,41 +4,49 @@ import { onMounted, ref, watch } from 'vue'
 import Menu from '@/shared/components/Menu.vue'
 import Footer from '@/shared/components/Footer.vue'
 import { useAuthStore } from '@/modules/samples/states/auth'
+import { useTasksStore } from '@/modules/samples/states/tasks'
 import { todoService } from '@/services/todo.service'
 import { useRouter, useRoute } from 'vue-router'
 
 const authStore = useAuthStore()
+const tasksStore = useTasksStore()
 const sidebarOpen = ref(false)
-const hasOpenTasks = ref<boolean | null>(null)
 const router = useRouter()
 const route = useRoute()
 
-async function checkOpenTasks() {
+/**
+ * Checagem inicial, pra ter algum valor assim que a página carrega
+ * (mesmo se o usuário nunca tiver aberto /todo-list nessa sessão).
+ * Depois disso, quem mantém isso atualizado em tempo real é o
+ * TodoPage.vue, via essa mesma store.
+ */
+async function checkOpenTasksOnce() {
+  if (tasksStore.hasOpenTasks !== null) return
+
   try {
     const lists = await todoService.getLists()
     const firstList = lists[0]
 
     if (!firstList) {
-      hasOpenTasks.value = false
+      tasksStore.hasOpenTasks = false
       return
     }
 
     const todos = await todoService.getTodos(firstList.id)
-    hasOpenTasks.value = todos.some((todo) => !todo.completed)
+    tasksStore.setTodos(todos)
   } catch {
-    hasOpenTasks.value = false
+    tasksStore.hasOpenTasks = false
   }
 }
 
 onMounted(() => {
-  checkOpenTasks()
+  checkOpenTasksOnce()
 })
 
 watch(
   () => route.fullPath,
   () => {
     sidebarOpen.value = false
-    checkOpenTasks()
   }
 )
 
@@ -80,17 +88,17 @@ async function handleLogout() {
 
           <div class="flex items-center gap-3">
             <button
-              :title="hasOpenTasks ? 'Você tem tarefas pendentes para resolver' : 'Todas as tarefas foram concluídas'"
+              :title="tasksStore.hasOpenTasks ? 'Você tem tarefas pendentes para resolver' : 'Todas as tarefas foram concluídas'"
               class="relative w-10 h-10 rounded-lg bg-gray-800 text-gray-400 hover:text-white hover:bg-gray-700 transition">
               🔔
-              <span v-if="hasOpenTasks !== null" class="absolute -top-0.5 -right-0.5 flex h-3 w-3">
+              <span v-if="tasksStore.hasOpenTasks !== null" class="absolute -top-0.5 -right-0.5 flex h-3 w-3">
                 <span
-                  v-if="hasOpenTasks"
+                  v-if="tasksStore.hasOpenTasks"
                   class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"
                 ></span>
                 <span
                   class="relative inline-flex h-3 w-3 rounded-full"
-                  :class="hasOpenTasks ? 'bg-red-500' : 'bg-emerald-500'"
+                  :class="tasksStore.hasOpenTasks ? 'bg-red-500' : 'bg-emerald-500'"
                 ></span>
               </span>
             </button>
