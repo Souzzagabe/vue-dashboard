@@ -18,25 +18,6 @@ onMounted(async () => {
 <template>
     <nav class="flex flex-col h-full">
 
-        <!-- Logo -->
-        <div class="flex items-center gap-3 px-3">
-            <div class="w-10 h-10 rounded-xl bg-sky-600 flex items-center justify-center">
-                <span class="font-bold text-white text-lg">
-                    GS
-                </span>
-            </div>
-
-            <div>
-                <h1 class="text-white font-semibold">
-                </h1>
-
-                <span class="text-xs text-gray-400">
-                    Dashboard
-                </span>
-            </div>
-        </div>
-
-
         <!-- Menu mais abaixo -->
         <div class="mt-12 flex flex-col gap-2">
 
