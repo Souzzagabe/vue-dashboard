@@ -4,11 +4,11 @@ import { ref } from 'vue'
 import { authService } from '@/services/auth.service'
 
 const emit = defineEmits<{
-  registered: [username: string, password: string]
+  registered: [email: string, password: string]
   cancel: []
 }>()
 
-const username = ref('')
+const email = ref('')
 const password = ref('')
 const confirmPassword = ref('')
 const error = ref('')
@@ -17,13 +17,13 @@ const isLoading = ref(false)
 async function register() {
   error.value = ''
 
-  if (!username.value || !password.value || !confirmPassword.value) {
+  if (!email.value || !password.value || !confirmPassword.value) {
     error.value = 'Preencha todos os campos'
     return
   }
 
-  if (username.value.length < 3) {
-    error.value = 'Usuário deve ter ao menos 3 caracteres'
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value)) {
+    error.value = 'Digite um e-mail válido'
     return
   }
 
@@ -41,14 +41,14 @@ async function register() {
 
   try {
     await authService.register({
-      username: username.value,
+      email: email.value,
       password: password.value,
     })
 
-    emit('registered', username.value, password.value)
+    emit('registered', email.value, password.value)
   } catch (e: any) {
     if (e.response?.status === 409) {
-      error.value = 'Esse usuário já existe'
+      error.value = 'Esse e-mail já está cadastrado'
     } else {
       error.value =
         e.response?.data?.message ||
@@ -92,10 +92,10 @@ async function register() {
       @submit.prevent="register"
     >
       <input
-        v-model="username"
-        type="text"
-        placeholder="Username"
-        autocomplete="username"
+        v-model="email"
+        type="email"
+        placeholder="Email"
+        autocomplete="email"
         class="
           w-full
           px-4

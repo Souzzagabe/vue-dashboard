@@ -1,7 +1,7 @@
 import { api } from './api'
 
 export interface LoginRequest {
-  username: string
+  email: string
   password: string
 }
 
@@ -10,13 +10,14 @@ export interface LoginResponse {
 }
 
 export interface RegisterRequest {
-  username: string
+  email: string
   password: string
 }
 
 export interface RegisterResponse {
   id: string
   username: string
+  email?: string
   role?: 'admin' | 'user'
 }
 
@@ -56,7 +57,7 @@ export const authService = {
 
     const { data } = await api.post<LoginResponse>(
       '/login',
-      { username: credentials.username },
+      { email: credentials.email },
       { headers: { 'X-Password-Hash': passwordHash } }
     )
 
@@ -76,7 +77,7 @@ export const authService = {
 
     const { data } = await api.post<RegisterResponse>(
       '/users',
-      { username: payload.username },
+      { email: payload.email },
       { headers: { 'X-Password-Hash': passwordHash } }
     )
 
