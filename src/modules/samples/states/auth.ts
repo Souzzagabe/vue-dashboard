@@ -17,14 +17,14 @@ export const useAuthStore = defineStore('auth', () => {
   })
 
   async function login(
-    username: string,
+    email: string,
     password: string
   ) {
     try {
       isLoading.value = true
 
       await authService.login({
-        username,
+        email,
         password,
       })
 
