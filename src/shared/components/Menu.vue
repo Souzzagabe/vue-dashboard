@@ -27,7 +27,7 @@ onMounted(async () => {
 
             <MenuItem to="/home" label="Home" />
 
-            <MenuItem to="/todo-list" label="Todo List" />
+            <MenuItem to="/todo-list" label="Lista de tarefas" />
 
             <MenuItem to="/profile" label="Perfil" />
 
